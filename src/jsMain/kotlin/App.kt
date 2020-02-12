@@ -9,17 +9,18 @@ import io.ktor.http.cio.websocket.send
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
+import kotlinx.serialization.internal.message
 import react.dom.*
 import react.*
 
 interface AppState: RState {
     var platform: String?
-    var messageLog: String
+    var messageLog: List<String>
 }
 
 class App: RComponent<RProps, AppState>() {
     override fun AppState.init() {
-        messageLog = ""
+        messageLog = emptyList()
         val wsClient = HttpClient() {
             install(WebSockets)
         }
@@ -33,7 +34,7 @@ class App: RComponent<RProps, AppState>() {
                 while(true) {
                     val frame = incoming.receive()
                     if (frame is Frame.Text) setState {
-                        messageLog + frame.readText() + "\n"
+                        messageLog += frame.readText() + "\n"
                     }
                 }
             }
@@ -54,6 +55,11 @@ class App: RComponent<RProps, AppState>() {
             attrs {
                 onClick = {setState { platform = "this" }}
                 label = "this"
+            }
+        }
+        state.messageLog.forEach {
+            p {
+                +it
             }
         }
     }

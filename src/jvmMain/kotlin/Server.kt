@@ -5,6 +5,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.file
 import io.ktor.http.content.files
 import io.ktor.http.content.resources
@@ -16,6 +17,8 @@ import io.ktor.routing.routing
 import io.ktor.serialization.serialization
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.websocket.WebSockets
+import io.ktor.websocket.webSocket
 
 object Humans {
     val text = javaClass.classLoader.getResource("humans.txt").readText()
@@ -38,6 +41,10 @@ fun main() {
             anyHost()
         }
 
+        install(WebSockets) {
+
+        }
+
         routing {
             static("/static") {
                 resources("")
@@ -45,19 +52,19 @@ fun main() {
             get("/todos") {
                 call.respond(todoItems.first())
             }
-//            webSocket("/") {
-//                for (frame in incoming) {
-//                    when (frame) {
-//                        is Frame.Text -> {
-//                            val text = frame.readText()
-//                            outgoing.send(Frame.Text("YOU SAID: $text"))
-//                            if (text.equals("bye", ignoreCase = true)) {
-//                                close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            webSocket("/") {
+                for (frame in incoming) {
+                    when (frame) {
+                        is Frame.Text -> {
+                            val text = frame.readText()
+                            outgoing.send(Frame.Text("YOU SAID: $text"))
+                            if (text.equals("bye", ignoreCase = true)) {
+                                close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+                            }
+                        }
+                    }
+                }
+            }
         }
     }.start(wait = true)
 }
