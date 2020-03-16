@@ -1,9 +1,13 @@
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
+val kotlinVersion = "1.3.70"
+val serializationVersion = "0.20.0"
+val ktorVersion = "1.3.2"
+
 plugins {
-    kotlin("multiplatform") version "1.3.70-eap-184"
+    kotlin("multiplatform") version "1.3.70"
     application //to run JVM part
-    kotlin("plugin.serialization") version "1.3.70-eap-184"
+    kotlin("plugin.serialization") version "1.3.70"
 }
 
 group = "org.example"
@@ -31,9 +35,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("io.ktor:ktor-serialization:1.3.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:0.14.0-1.3.70-eap-134") // JVM dependency
-                implementation("io.ktor:ktor-client-core:1.3.0")
+                implementation("io.ktor:ktor-serialization:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
             }
         }
         val commonTest by getting {
@@ -45,12 +49,12 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-server-core:1.3.0")
-                implementation("io.ktor:ktor-server-netty:1.3.0")
+                implementation("io.ktor:ktor-server-core:$ktorVersion")
+                implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:1.2.3")
-                implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION)) // or "stdlib-jdk8"
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0-1.3.70-eap-134") // JVM dependency
-                implementation("io.ktor:ktor-websockets:1.3.0")
+                implementation(kotlin("stdlib", kotlinVersion)) // or "stdlib-jdk8"
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion") // JVM dependency
+                implementation("io.ktor:ktor-websockets:$ktorVersion")
             }
         }
 
@@ -58,28 +62,29 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-js"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.14.0-1.3.70-eap-134")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion")
                 //todo: bugfix in kx.serialization?
                 implementation(npm("text-encoding"))
                 implementation(npm("abort-controller"))
 
-                implementation("io.ktor:ktor-client-js:1.3.0") //include http&websockets
+                implementation("io.ktor:ktor-client-js:$ktorVersion") //include http&websockets
                 //todo: bugfix in ktor-client?
                 implementation(npm("bufferutil")) //TODO: Uncomment this and stuff breaks. WHY?
                 implementation(npm("utf-8-validate"))
 
                 //ktor client js json
-                implementation("io.ktor:ktor-client-json-js:1.3.0")
-                implementation("io.ktor:ktor-client-serialization-js:1.3.0")
+                implementation("io.ktor:ktor-client-json-js:$ktorVersion")
+                implementation("io.ktor:ktor-client-serialization-js:$ktorVersion")
+                implementation(npm("fs"))
 
                 //React, React DOM + Wrappers (chapter 3)
-                implementation("org.jetbrains:kotlin-react:16.9.0-pre.89-kotlin-1.3.60")
-                implementation("org.jetbrains:kotlin-react-dom:16.9.0-pre.89-kotlin-1.3.60")
-                implementation(npm("react", "16.12.0"))
-                implementation(npm("react-dom", "16.12.0"))
+                implementation("org.jetbrains:kotlin-react:16.13.0-pre.93-kotlin-1.3.70")
+                implementation("org.jetbrains:kotlin-react-dom:16.13.0-pre.93-kotlin-1.3.70")
+                implementation(npm("react", "16.13.0"))
+                implementation(npm("react-dom", "16.13.0"))
 
                 //Kotlin Styled (chapter 3)
-                implementation("org.jetbrains:kotlin-styled:1.0.0-pre.90-kotlin-1.3.61")
+                implementation("org.jetbrains:kotlin-styled:1.0.0-pre.93-kotlin-1.3.70")
                 implementation(npm("styled-components"))
                 implementation(npm("inline-style-prefixer"))
             }

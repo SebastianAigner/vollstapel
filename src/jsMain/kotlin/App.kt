@@ -9,7 +9,6 @@ import io.ktor.http.cio.websocket.send
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
-import kotlinx.serialization.internal.message
 import react.dom.*
 import react.*
 
