@@ -4,6 +4,9 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.features.websocket.WebSockets
 import io.ktor.client.request.get
 import io.ktor.utils.io.core.use
+import kotlinx.html.dom.append
+import kotlinx.html.dom.create
+import kotlinx.html.js.div
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.WebSocket
 import kotlin.browser.document

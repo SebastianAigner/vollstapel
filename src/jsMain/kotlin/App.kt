@@ -1,11 +1,8 @@
 import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.WebSockets
-import io.ktor.client.features.websocket.ws
-import io.ktor.http.HttpMethod
-import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.readBytes
-import io.ktor.http.cio.websocket.readText
-import io.ktor.http.cio.websocket.send
+import io.ktor.client.engine.js.Js
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
@@ -15,27 +12,22 @@ import react.*
 interface AppState: RState {
     var platform: String?
     var messageLog: List<String>
+    var todos: List<TodoItem>
 }
 
 class App: RComponent<RProps, AppState>() {
     override fun AppState.init() {
         messageLog = emptyList()
-        val wsClient = HttpClient() {
-            install(WebSockets)
+        todos = listOf()
+        val jsonClient = HttpClient {
+            install(JsonFeature) {
+                serializer = KotlinxSerializer()
+            }
         }
         GlobalScope.launch {
-            wsClient.ws(
-                method = HttpMethod.Get,
-                host = "127.0.0.1",
-                port = 9090
-            ) {
-                send("HELLO WORLD")
-                while(true) {
-                    val frame = incoming.receive()
-                    if (frame is Frame.Text) setState {
-                        messageLog += frame.readText() + "\n"
-                    }
-                }
+            val result = jsonClient.get<List<TodoItem>>("http://localhost:9090/todos")
+            setState {
+                todos = result
             }
         }
     }
@@ -59,6 +51,11 @@ class App: RComponent<RProps, AppState>() {
         state.messageLog.forEach {
             p {
                 +it
+            }
+        }
+        state.todos.forEach {
+            p {
+                +it.toString()
             }
         }
     }

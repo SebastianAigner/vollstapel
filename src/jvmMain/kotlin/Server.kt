@@ -14,6 +14,7 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import io.ktor.serialization.json
 import io.ktor.serialization.serialization
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -34,7 +35,7 @@ fun main() {
     println("Made by ${Humans.text}")
     embeddedServer(Netty, 9090) {
         install(ContentNegotiation) {
-            serialization()
+            json()
         }
         install(CORS) {
             method(HttpMethod.Get)
@@ -50,7 +51,7 @@ fun main() {
                 resources("")
             }
             get("/todos") {
-                call.respond(todoItems.first())
+                call.respond(todoItems)
             }
             webSocket("/") {
                 for (frame in incoming) {
