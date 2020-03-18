@@ -1,78 +1,65 @@
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.js.Js
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.html.js.onClickFunction
-import react.dom.*
 import react.*
+import react.dom.h1
+import react.dom.p
 
-interface AppState: RState {
-    var platform: String?
-    var messageLog: List<String>
-    var todos: List<TodoItem>
+val endpoint = "http://localhost:9090"
+
+val jsonClient = HttpClient {
+    install(JsonFeature) {
+        serializer = KotlinxSerializer()
+    }
 }
 
-class App: RComponent<RProps, AppState>() {
+interface AppState : RState {
+    var cartItems: List<CartItem>
+}
+
+class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
-        messageLog = emptyList()
-        todos = listOf()
-        val jsonClient = HttpClient {
-            install(JsonFeature) {
-                serializer = KotlinxSerializer()
-            }
-        }
+        cartItems = listOf()
+        GlobalScope.launch { obtainTodos() }
+    }
+
+    suspend fun obtainTodos() {
+        val result = jsonClient.get<List<CartItem>>(endpoint + CartItem.path)
+        setState { cartItems = result }
+    }
+
+    fun addTodo(input: String) {
+        val todoItem = CartItem(input, input.count { it == '!' })
+        println("adding $todoItem")
+        setState { cartItems += todoItem }
         GlobalScope.launch {
-            val result = jsonClient.get<List<TodoItem>>("http://localhost:9090/todos")
-            setState {
-                todos = result
+            jsonClient.post<Unit>(endpoint + CartItem.path) {
+                contentType(ContentType.Application.Json)
+                body = todoItem
             }
         }
     }
 
     override fun RBuilder.render() {
         h1 {
-            +"Hello, ${state.platform ?: ""}!"
+            +"News from JS!"
         }
-        child(Button::class) {
-            attrs {
-                onClick = {setState { platform = "other" }}
-                label = "other"
-            }
-        }
-        child(Button::class) {
-            attrs {
-                onClick = {setState { platform = "this" }}
-                label = "this"
-            }
-        }
-        state.messageLog.forEach {
+        state.cartItems.forEach {
             p {
-                +it
-            }
-        }
-        state.todos.forEach {
-            p {
+                key = it.toString()
                 +it.toString()
             }
         }
-    }
-}
-
-interface ButtonProps: RProps {
-    var label: String
-    var onClick: () -> Unit
-}
-
-class Button: RComponent<ButtonProps, RState>() {
-    override fun RBuilder.render() {
-        button {
-            attrs {
-                onClickFunction = { props.onClick() }
-            }
-            +props.label
+        child(InputComponent::class) {
+            key = "inComponent"
+            attrs.onSubmit = { addTodo(it) }
         }
     }
 }
+

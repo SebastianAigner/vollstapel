@@ -2,37 +2,26 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
-import io.ktor.http.cio.websocket.*
-import io.ktor.http.content.file
-import io.ktor.http.content.files
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
+import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.serialization.json
-import io.ktor.serialization.serialization
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.websocket.WebSockets
-import io.ktor.websocket.webSocket
 
-object Humans {
-    val text = javaClass.classLoader.getResource("humans.txt").readText()
-}
-
-val todoItems = listOf(
-    TodoItem("Buy cat", 1),
-    TodoItem("Eat laundry", 2),
-    TodoItem("Milk pizza", 3)
+val todoItems = mutableListOf(
+    CartItem("Buy cat", 1),
+    CartItem("Eat laundry", 2),
+    CartItem("Milk pizza", 3)
 )
 
 fun main() {
-    println("Made by ${Humans.text}")
     embeddedServer(Netty, 9090) {
         install(ContentNegotiation) {
             json()
@@ -42,29 +31,18 @@ fun main() {
             anyHost()
         }
 
-        install(WebSockets) {
-
-        }
-
         routing {
             static("/static") {
                 resources("")
             }
-            get("/todos") {
+            get(CartItem.path) {
                 call.respond(todoItems)
             }
-            webSocket("/") {
-                for (frame in incoming) {
-                    when (frame) {
-                        is Frame.Text -> {
-                            val text = frame.readText()
-                            outgoing.send(Frame.Text("YOU SAID: $text"))
-                            if (text.equals("bye", ignoreCase = true)) {
-                                close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                            }
-                        }
-                    }
-                }
+            post(CartItem.path) {
+                val myDataClass = call.receive<CartItem>()
+                println("received $myDataClass")
+                todoItems += myDataClass
+                call.respond(HttpStatusCode.OK)
             }
         }
     }.start(wait = true)
