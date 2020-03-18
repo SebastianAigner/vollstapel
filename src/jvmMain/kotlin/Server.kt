@@ -16,9 +16,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 
 val todoItems = mutableListOf(
-    CartItem("Buy cat", 1),
-    CartItem("Eat laundry", 2),
-    CartItem("Milk pizza", 3)
+    CartItem("Cucumbers 🥒", 1),
+    CartItem("Tomatoes 🍅", 2),
+    CartItem("Orange Juice 🍊", 3)
 )
 
 fun main() {

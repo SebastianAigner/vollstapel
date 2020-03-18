@@ -34,31 +34,32 @@ class App : RComponent<RProps, AppState>() {
         setState { cartItems = result }
     }
 
-    fun addTodo(input: String) {
-        val todoItem = CartItem(input, input.count { it == '!' })
-        println("adding $todoItem")
-        setState { cartItems += todoItem }
-        GlobalScope.launch {
-            jsonClient.post<Unit>(endpoint + CartItem.path) {
-                contentType(ContentType.Application.Json)
-                body = todoItem
-            }
+    suspend fun sendCartItem(cartItem: CartItem) {
+        jsonClient.post<Unit>(endpoint + CartItem.path) {
+            contentType(ContentType.Application.Json)
+            body = cartItem
         }
+    }
+
+    val addTodo: (String) -> Unit = { input ->
+        val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
+        setState { cartItems += cartItem }
+        GlobalScope.launch { sendCartItem(cartItem) }
     }
 
     override fun RBuilder.render() {
         h1 {
-            +"News from JS!"
+            +"Full-Stack Shopping List"
         }
-        state.cartItems.forEach {
+        state.cartItems.sortedByDescending(CartItem::priority).forEach {
             p {
                 key = it.toString()
-                +it.toString()
+                +"[${it.priority}] ${it.desc}"
             }
         }
         child(InputComponent::class) {
             key = "inComponent"
-            attrs.onSubmit = { addTodo(it) }
+            attrs.onSubmit = addTodo
         }
     }
 }
