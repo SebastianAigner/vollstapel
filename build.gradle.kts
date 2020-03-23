@@ -30,6 +30,7 @@ kotlin {
         withJava()
     }
     js {
+        produceExecutable()
         browser {
         }
     }
@@ -95,14 +96,15 @@ application {
     mainClassName = "ServerKt"
 }
 
-//tasks.getByName<Jar>("jvmJar") {
-//    val taskName = "jsBrowserDevelopmentWebpack"
-//    dependsOn(tasks.getByName(taskName))
-//    val jsBrowserProductionWebpack = tasks.getByName<KotlinWebpack>(taskName)
-//    from(File(jsBrowserProductionWebpack.destinationDirectory, jsBrowserProductionWebpack.outputFileName))
-//}
-//
-//tasks.getByName<JavaExec>("run") {
-//    dependsOn(tasks.getByName<Jar>("jvmJar"))
-//    classpath(tasks.getByName<Jar>("jvmJar"))
-//}
+tasks.getByName<Jar>("jvmJar") {
+    val taskName = "jsBrowserDevelopmentWebpack"
+    dependsOn(tasks.getByName(taskName))
+    val jsBrowserProductionWebpack =
+        tasks.getByName<org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack>(taskName)
+    from(File(jsBrowserProductionWebpack.destinationDirectory, jsBrowserProductionWebpack.outputFileName))
+}
+
+tasks.getByName<JavaExec>("run") {
+    dependsOn(tasks.getByName<Jar>("jvmJar"))
+    classpath(tasks.getByName<Jar>("jvmJar"))
+}
