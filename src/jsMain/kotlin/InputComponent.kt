@@ -20,22 +20,22 @@ class InputComponent : RComponent<InputProps, InputState>() {
         text = ""
     }
 
-    val submit: (Event) -> Unit = {
+    val submitHandler: (Event) -> Unit = {
         it.preventDefault()
         setState { text = "" } // setState runs asynchronously!
         props.onSubmit(state.text)
     }
 
-    val change: (Event) -> Unit = {
+    val changeHandler: (Event) -> Unit = {
         val value = (it.target as HTMLInputElement).value
         setState { text = value }
     }
 
     override fun RBuilder.render() {
         form {
-            attrs.onSubmitFunction = submit
+            attrs.onSubmitFunction = submitHandler
             input(InputType.text) {
-                attrs.onChangeFunction = change
+                attrs.onChangeFunction = changeHandler
                 attrs.value = state.text
             }
         }
