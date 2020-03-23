@@ -1,13 +1,13 @@
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
-
-val kotlinVersion = "1.3.70"
-val serializationVersion = "0.20.0"
-val ktorVersion = "1.3.2"
+val kotlinVersion = "1.4-M1"
+val serializationVersion = "0.20.0-1.4-M1"
+val ktorVersion = "1.3.2-1.4-M1"
+val reactWrappersVersion = "16.13.0-pre.93-kotlin-1.4-M1-release-99"
+val reactVersion = "16.13.0"
 
 plugins {
-    kotlin("multiplatform") version "1.3.70"
+    kotlin("multiplatform") version "1.4-M1"
     application //to run JVM part
-    kotlin("plugin.serialization") version "1.3.70"
+    kotlin("plugin.serialization") version "1.4-M1"
 }
 
 group = "org.example"
@@ -15,6 +15,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     maven { setUrl("https://dl.bintray.com/kotlin/kotlin-eap") }
+    maven { setUrl("https://dl.bintray.com/kotlin/kotlin-dev") }
     mavenCentral()
     jcenter()
     maven("https://kotlin.bintray.com/kotlin-js-wrappers/") // react, styled, ...
@@ -30,7 +31,6 @@ kotlin {
     }
     js {
         browser {
-
         }
     }
     sourceSets {
@@ -82,10 +82,10 @@ kotlin {
                 implementation(npm("fs"))
 
                 //React, React DOM + Wrappers (chapter 3)
-                implementation("org.jetbrains:kotlin-react:16.13.0-pre.93-kotlin-1.3.70")
-                implementation("org.jetbrains:kotlin-react-dom:16.13.0-pre.93-kotlin-1.3.70")
-                implementation(npm("react", "16.13.0"))
-                implementation(npm("react-dom", "16.13.0"))
+                implementation("org.jetbrains:kotlin-react:$reactWrappersVersion")
+                implementation("org.jetbrains:kotlin-react-dom:$reactWrappersVersion")
+                implementation(npm("react", reactVersion))
+                implementation(npm("react-dom", reactVersion))
             }
         }
     }
@@ -95,14 +95,14 @@ application {
     mainClassName = "ServerKt"
 }
 
-tasks.getByName<Jar>("jvmJar") {
-    val taskName = "jsBrowserDevelopmentWebpack"
-    dependsOn(tasks.getByName(taskName))
-    val jsBrowserProductionWebpack = tasks.getByName<KotlinWebpack>(taskName)
-    from(File(jsBrowserProductionWebpack.destinationDirectory, jsBrowserProductionWebpack.outputFileName))
-}
-
-tasks.getByName<JavaExec>("run") {
-    dependsOn(tasks.getByName<Jar>("jvmJar"))
-    classpath(tasks.getByName<Jar>("jvmJar"))
-}
+//tasks.getByName<Jar>("jvmJar") {
+//    val taskName = "jsBrowserDevelopmentWebpack"
+//    dependsOn(tasks.getByName(taskName))
+//    val jsBrowserProductionWebpack = tasks.getByName<KotlinWebpack>(taskName)
+//    from(File(jsBrowserProductionWebpack.destinationDirectory, jsBrowserProductionWebpack.outputFileName))
+//}
+//
+//tasks.getByName<JavaExec>("run") {
+//    dependsOn(tasks.getByName<Jar>("jvmJar"))
+//    classpath(tasks.getByName<Jar>("jvmJar"))
+//}
