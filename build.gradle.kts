@@ -1,6 +1,6 @@
 val kotlinVersion = "1.4-M1"
 val serializationVersion = "0.20.0-1.4-M1"
-val ktorVersion = "1.3.2-1.4-M1"
+val ktorVersion = "1.3.2-1.4-M1-2"
 val reactWrappersVersion = "16.13.0-pre.93-kotlin-1.4-M1"
 val reactVersion = "16.13.0"
 

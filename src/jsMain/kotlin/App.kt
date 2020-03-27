@@ -10,7 +10,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
 import react.*
-import react.dom.button
 import react.dom.h1
 import react.dom.p
 
@@ -26,7 +25,10 @@ interface AppState : RState {
 
 class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
-        cartItems = listOf()
+        cartItems = listOf(
+            CartItem("Connect to MongoDB...", 0),
+            CartItem("Please wait...", 1)
+        )
         GlobalScope.launch { obtainCart() }
     }
 
@@ -66,12 +68,10 @@ class App : RComponent<RProps, AppState>() {
             p {
                 key = it.toString()
                 +"[${it.priority}] ${it.desc} "
-                button {
-                    attrs.onClickFunction = { e ->
-                        GlobalScope.launch {
-                            deleteCartItem(it)
-                            obtainCart()
-                        }
+                attrs.onClickFunction = { e ->
+                    GlobalScope.launch {
+                        deleteCartItem(it)
+                        obtainCart()
                     }
                 }
             }
