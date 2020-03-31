@@ -1,7 +1,10 @@
+import com.mongodb.ConnectionString
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
+import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.gzip
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
@@ -29,10 +32,12 @@ import org.litote.kmongo.eq
 //    CartItem("Orange Juice 🍊", 3)
 //)
 
-val connectionString: String? = System.getenv("MONGODB_URI")
+val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
+    ConnectionString(it)
+}
 
 val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
-val database = client.getDatabase("test")
+val database = client.getDatabase(connectionString?.database ?: "test")
 val collection = database.getCollection<CartItem>()
 
 fun main() {
@@ -44,6 +49,9 @@ fun main() {
         install(CORS) {
             method(HttpMethod.Get)
             anyHost()
+        }
+        install(Compression) {
+            gzip()
         }
 
         routing {
