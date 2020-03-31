@@ -7,14 +7,15 @@ import react.*
 import react.dom.form
 import react.dom.input
 
-interface InputState : RState {
+external interface InputState : RState {
     var text: String
 }
 
-interface InputProps : RProps {
+external interface InputProps : RProps {
     var onSubmit: (String) -> Unit
 }
 
+@JsExport
 class InputComponent : RComponent<InputProps, InputState>() {
     override fun InputState.init() {
         text = ""

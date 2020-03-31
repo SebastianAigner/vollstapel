@@ -19,10 +19,11 @@ val jsonClient = HttpClient {
     install(JsonFeature) { serializer = KotlinxSerializer() }
 }
 
-interface AppState : RState {
+external interface AppState : RState {
     var cartItems: List<CartItem>
 }
 
+@JsExport
 class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
         cartItems = listOf(
