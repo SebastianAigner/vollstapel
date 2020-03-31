@@ -29,9 +29,9 @@ import org.litote.kmongo.eq
 //    CartItem("Orange Juice 🍊", 3)
 //)
 
-val client = KMongo.createClient()
-val database = client.getDatabase("test")
-val collection = database.getCollection<CartItem>()
+//val client = KMongo.createClient()
+//val database = client.getDatabase("test")
+//val collection = database.getCollection<CartItem>()
 
 fun main() {
     embeddedServer(Netty, 9090) {
@@ -47,18 +47,18 @@ fun main() {
             static("/static") {
                 resources("")
             }
-            get(CartItem.path) {
-                call.respond(collection.find().toList())
-            }
-            post(CartItem.path) {
-                collection.insertOne(call.receive<CartItem>())
-                call.respond(HttpStatusCode.OK)
-            }
-            delete(CartItem.path) {
-                val received = call.receive<CartItem>()
-                collection.deleteOne(CartItem::desc eq received.desc)
-                call.respond(HttpStatusCode.OK)
-            }
+//            get(CartItem.path) {
+//                call.respond(collection.find().toList())
+//            }
+//            post(CartItem.path) {
+//                collection.insertOne(call.receive<CartItem>())
+//                call.respond(HttpStatusCode.OK)
+//            }
+//            delete(CartItem.path) {
+//                val received = call.receive<CartItem>()
+//                collection.deleteOne(CartItem::desc eq received.desc)
+//                call.respond(HttpStatusCode.OK)
+//            }
         }
     }.start(wait = true)
 }
