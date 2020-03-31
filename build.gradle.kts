@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
-val kotlinVersion = "1.3.70"
+val kotlinVersion = "1.3.71"
 val serializationVersion = "0.20.0"
 val ktorVersion = "1.3.2"
 
 plugins {
-    kotlin("multiplatform") version "1.3.70"
+    kotlin("multiplatform") version "1.3.71"
     application //to run JVM part
     kotlin("plugin.serialization") version "1.3.70"
 }
@@ -19,6 +19,14 @@ repositories {
     jcenter()
     maven("https://kotlin.bintray.com/kotlin-js-wrappers/") // react, styled, ...
 }
+
+//distributions {
+//    main {
+//        contents {
+//            from("build/libs")
+//        }
+//    }
+//}
 
 kotlin {
     /* Targets configuration omitted. 
@@ -102,7 +110,10 @@ tasks.getByName<Jar>("jvmJar") {
     from(File(jsBrowserProductionWebpack.destinationDirectory, jsBrowserProductionWebpack.outputFileName))
 }
 
-tasks.getByName<JavaExec>("run") {
+tasks.getByName<Sync>("installDist") {
+    from("build/libs") {
+        into("lib")
+    }
     dependsOn(tasks.getByName<Jar>("jvmJar"))
-    classpath(tasks.getByName<Jar>("jvmJar"))
+    //classpath(tasks.getByName<Jar>("jvmJar"))
 }
