@@ -34,7 +34,8 @@ import org.litote.kmongo.eq
 //val collection = database.getCollection<CartItem>()
 
 fun main() {
-    embeddedServer(Netty, 9090) {
+    val port = java.lang.System.getenv("PORT")?.toInt() ?: 9090
+    embeddedServer(Netty, port) {
         install(ContentNegotiation) {
             json()
         }
