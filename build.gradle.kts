@@ -117,3 +117,7 @@ tasks.getByName<Sync>("installDist") {
     dependsOn(tasks.getByName<Jar>("jvmJar"))
     //classpath(tasks.getByName<Jar>("jvmJar"))
 }
+
+tasks.create("stage") {
+    dependsOn(tasks.getByName("installDist"))
+}
