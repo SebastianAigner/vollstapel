@@ -17,7 +17,7 @@ import kotlin.browser.window
 
 val endpoint = with(window.location) {
     listOf(
-        if (protocol.contains("s")) "wss" else "ws",
+        if (protocol.contains("s")) "https" else "http",
         "://",
         host
     ).joinToString("")
