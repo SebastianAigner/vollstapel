@@ -33,7 +33,7 @@ import org.litote.kmongo.eq
 //)
 
 val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
-    ConnectionString(it)
+    ConnectionString(it + "&retryWrites=false")
 }
 
 val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
