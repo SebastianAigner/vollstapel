@@ -112,6 +112,7 @@ tasks.getByName<Jar>("jvmJar") {
 
 tasks.getByName<Sync>("installDist") {
     from("build/libs") {
+        rename("vollstapel-jvm", "vollstapel")
         into("lib")
     }
     dependsOn(tasks.getByName<Jar>("jvmJar"))
