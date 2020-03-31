@@ -13,8 +13,15 @@ import react.*
 import react.dom.button
 import react.dom.h1
 import react.dom.p
+import kotlin.browser.window
 
-val endpoint = "http://localhost:9090"
+val endpoint = with(window.location) {
+    listOf(
+        if (protocol.contains("s")) "wss" else "ws",
+        "://",
+        host
+    ).joinToString("")
+} // makeshift fix until https://github.com/ktorio/ktor/issues/1695 is resolved
 
 val jsonClient = HttpClient {
     install(JsonFeature) { serializer = KotlinxSerializer() }
