@@ -122,3 +122,8 @@ tasks.getByName<Sync>("installDist") {
 tasks.create("stage") {
     dependsOn(tasks.getByName("installDist"))
 }
+
+tasks.getByName<JavaExec>("run") {
+    dependsOn(tasks.getByName<Jar>("jvmJar"))
+    classpath(tasks.getByName<Jar>("jvmJar"))
+}
