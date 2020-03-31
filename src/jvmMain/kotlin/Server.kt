@@ -22,19 +22,21 @@ import org.litote.kmongo.coroutine.insertOne
 import org.litote.kmongo.coroutine.toList
 import org.litote.kmongo.eq
 
-//
+
 //val todoItems = mutableListOf(
 //    CartItem("Cucumbers 🥒", 1),
 //    CartItem("Tomatoes 🍅", 2),
 //    CartItem("Orange Juice 🍊", 3)
 //)
 
-//val client = KMongo.createClient()
-//val database = client.getDatabase("test")
-//val collection = database.getCollection<CartItem>()
+val connectionString: String? = System.getenv("MONGODB_URI")
+
+val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
+val database = client.getDatabase("test")
+val collection = database.getCollection<CartItem>()
 
 fun main() {
-    val port = java.lang.System.getenv("PORT")?.toInt() ?: 9090
+    val port = System.getenv("PORT")?.toInt() ?: 9090
     embeddedServer(Netty, port) {
         install(ContentNegotiation) {
             json()
@@ -48,18 +50,18 @@ fun main() {
             static("/static") {
                 resources("")
             }
-//            get(CartItem.path) {
-//                call.respond(collection.find().toList())
-//            }
-//            post(CartItem.path) {
-//                collection.insertOne(call.receive<CartItem>())
-//                call.respond(HttpStatusCode.OK)
-//            }
-//            delete(CartItem.path) {
-//                val received = call.receive<CartItem>()
-//                collection.deleteOne(CartItem::desc eq received.desc)
-//                call.respond(HttpStatusCode.OK)
-//            }
+            get(CartItem.path) {
+                call.respond(collection.find().toList())
+            }
+            post(CartItem.path) {
+                collection.insertOne(call.receive<CartItem>())
+                call.respond(HttpStatusCode.OK)
+            }
+            delete(CartItem.path) {
+                val received = call.receive<CartItem>()
+                collection.deleteOne(CartItem::desc eq received.desc)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }.start(wait = true)
 }
