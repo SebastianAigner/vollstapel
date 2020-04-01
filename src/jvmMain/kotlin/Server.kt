@@ -33,7 +33,7 @@ import org.litote.kmongo.eq
 //)
 
 val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
-    ConnectionString(it + "?retryWrites=false")
+    ConnectionString("$it?retryWrites=false")
 }
 
 val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
@@ -65,9 +65,9 @@ fun main() {
                 collection.insertOne(call.receive<CartItem>())
                 call.respond(HttpStatusCode.OK)
             }
-            delete(CartItem.path) {
-                val received = call.receive<CartItem>()
-                collection.deleteOne(CartItem::desc eq received.desc)
+            delete(CartItem.path +"/{id}") {
+                val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
+                collection.deleteOne(CartItem::id eq id)
                 call.respond(HttpStatusCode.OK)
             }
         }

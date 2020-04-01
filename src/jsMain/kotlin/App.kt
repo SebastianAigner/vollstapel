@@ -50,10 +50,7 @@ class App : RComponent<RProps, AppState>() {
     }
 
     suspend fun deleteCartItem(cartItem: CartItem) {
-        jsonClient.delete<Unit>(endpoint + CartItem.path) {
-            contentType(ContentType.Application.Json)
-            body = cartItem
-        }
+        jsonClient.delete<Unit>(endpoint + CartItem.path + "/${cartItem.id}")
     }
 
     val addCartItem: (String) -> Unit = { input ->
