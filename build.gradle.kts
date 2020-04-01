@@ -20,14 +20,6 @@ repositories {
     maven("https://kotlin.bintray.com/kotlin-js-wrappers/") // react, styled, ...
 }
 
-//distributions {
-//    main {
-//        contents {
-//            from("build/libs")
-//        }
-//    }
-//}
-
 kotlin {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
