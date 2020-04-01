@@ -1,10 +1,7 @@
 import com.mongodb.ConnectionString
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.features.Compression
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.gzip
+import io.ktor.features.*
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
@@ -21,6 +18,7 @@ import io.ktor.server.netty.Netty
 import org.litote.kmongo.async.KMongo
 import org.litote.kmongo.async.getCollection
 import org.litote.kmongo.coroutine.deleteOne
+import org.litote.kmongo.coroutine.findOne
 import org.litote.kmongo.coroutine.insertOne
 import org.litote.kmongo.coroutine.toList
 import org.litote.kmongo.eq
@@ -36,7 +34,7 @@ val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
     ConnectionString("$it?retryWrites=false")
 }
 
-val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
+val client = if (connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
 val database = client.getDatabase(connectionString?.database ?: "test")
 val collection = database.getCollection<CartItem>()
 
@@ -63,12 +61,19 @@ fun main() {
             get(CartItem.path) {
                 call.respond(collection.find().toList())
             }
+
+            get(CartItem.path + "/{id}") {
+                val id = call.parameters["id"]?.toInt() ?: throw NotFoundException()
+                val item = collection.findOne(CartItem::id eq id) ?: throw NotFoundException()
+                call.respond(item)
+            }
+
             post(CartItem.path) {
                 collection.insertOne(call.receive<CartItem>())
                 call.respond(HttpStatusCode.OK)
             }
-            delete(CartItem.path +"/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
+            delete(CartItem.path + "/{id}") {
+                val id = call.parameters["id"]?.toInt() ?: throw NotFoundException()
                 collection.deleteOne(CartItem::id eq id)
                 call.respond(HttpStatusCode.OK)
             }

@@ -1,4 +1,6 @@
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.html.*
 import kotlinx.html.dom.append
@@ -19,21 +21,32 @@ var cartItems: List<CartItem> by Delegates.observable(emptyList()) { _, _, new -
 val list: HTMLUListElement = document.create.ul {} as HTMLUListElement
 
 fun main() {
+    document.body?.let { body ->
+        body.addHeadline()
+        body.appendChild(list)
+        body.addForm()
+    }
 
-    document.body?.appendChild(list)
-    document.body?.addForm()
-    GlobalScope.launch {
+    GlobalScope.launch(Dispatchers.Default) {
         cartItems = obtainCart()
+    }
+}
+
+fun HTMLElement.addHeadline() {
+    append {
+        h1 { +"Kotlin/Fullstack Shopping List"}
     }
 }
 
 fun HTMLElement.addForm() {
     fun handleSubmit(e: Event) {
         e.preventDefault()
-        val element = document.getElementById("listInput") as HTMLInputElement
-        val input = element.value
-        element.value = ""
-        val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
+        val input = document.getElementById("listInput") as HTMLInputElement
+        val cartItem = CartItem(
+            input.value.replace("!", ""),
+            input.value.count { it == '!' }
+        )
+        input.value = ""
         GlobalScope.launch {
             sendCartItem(cartItem)
             cartItems = obtainCart()
@@ -43,7 +56,7 @@ fun HTMLElement.addForm() {
     append {
         form {
             onSubmitFunction = ::handleSubmit
-            input {
+            input(InputType.text) {
                 id = "listInput"
             }
         }
@@ -53,15 +66,17 @@ fun HTMLElement.addForm() {
 
 fun HTMLUListElement.renderCart(cart: List<CartItem>) {
     list.textContent = ""
-    cart.forEach { cartItem ->
-        append.li {
-            onClickFunction = {
-                GlobalScope.launch {
-                    deleteCartItem(cartItem)
-                    cartItems = obtainCart()
+    append {
+        cart.forEach { cartItem ->
+            li {
+                onClickFunction = {
+                    GlobalScope.launch {
+                        deleteCartItem(cartItem)
+                        cartItems = obtainCart()
+                    }
                 }
+                +"[${cartItem.priority}] ${cartItem.desc}"
             }
-            +cartItem.desc
         }
     }
 }

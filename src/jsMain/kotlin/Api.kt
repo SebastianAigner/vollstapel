@@ -8,13 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlin.browser.window
 
-val endpoint = with(window.location) {
-    listOf(
-        if (protocol.contains("s")) "https" else "http",
-        "://",
-        host
-    ).joinToString("")
-} // makeshift fix until https://github.com/ktorio/ktor/issues/1695 is resolved
+val endpoint = window.location.origin // until https://github.com/ktorio/ktor/issues/1695 is resolved
 
 val jsonClient = HttpClient {
     install(JsonFeature) { serializer = KotlinxSerializer() }
