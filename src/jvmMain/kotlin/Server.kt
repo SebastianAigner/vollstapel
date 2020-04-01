@@ -48,6 +48,8 @@ fun main() {
         }
         install(CORS) {
             method(HttpMethod.Get)
+            method(HttpMethod.Post)
+            method(HttpMethod.Delete)
             anyHost()
         }
         install(Compression) {
