@@ -1,19 +1,10 @@
-import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
 import react.*
-import react.dom.button
 import react.dom.h1
-import react.dom.p
-import kotlin.browser.window
+import react.dom.li
+import react.dom.ul
 
 
 interface AppState : RState {
@@ -39,14 +30,14 @@ class App : RComponent<RProps, AppState>() {
         h1 {
             +"Full-Stack Shopping List"
         }
-        state.cartItems.sortedByDescending(CartItem::priority).forEach {
-            p {
-                key = it.toString()
-                +"[${it.priority}] ${it.desc} "
-                button {
-                    attrs.onClickFunction = { e ->
+        ul {
+            state.cartItems.sortedByDescending(CartItem::priority).forEach { item ->
+                li {
+                    key = item.toString()
+                    +"[${item.priority}] ${item.desc} "
+                    attrs.onClickFunction = {
                         GlobalScope.launch {
-                            deleteCartItem(it)
+                            deleteCartItem(item)
                             refreshCart()
                         }
                     }
