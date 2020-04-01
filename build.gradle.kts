@@ -81,11 +81,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-serialization-js:$ktorVersion")
                 implementation(npm("fs"))
 
-                //React, React DOM + Wrappers (chapter 3)
-                implementation("org.jetbrains:kotlin-react:16.13.0-pre.93-kotlin-1.3.70")
-                implementation("org.jetbrains:kotlin-react-dom:16.13.0-pre.93-kotlin-1.3.70")
-                implementation(npm("react", "16.13.0"))
-                implementation(npm("react-dom", "16.13.0"))
+                implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.7.1")
             }
         }
     }

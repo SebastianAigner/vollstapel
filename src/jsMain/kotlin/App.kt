@@ -1,89 +1,67 @@
-import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.html.*
+import kotlinx.html.dom.append
+import kotlinx.html.dom.create
 import kotlinx.html.js.onClickFunction
-import react.*
-import react.dom.button
-import react.dom.h1
-import react.dom.p
-import kotlin.browser.window
+import kotlinx.html.js.onSubmitFunction
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLUListElement
+import org.w3c.dom.events.Event
+import kotlin.browser.document
+import kotlin.properties.Delegates
 
-val endpoint = with(window.location) {
-    listOf(
-        if (protocol.contains("s")) "https" else "http",
-        "://",
-        host
-    ).joinToString("")
-} // makeshift fix until https://github.com/ktorio/ktor/issues/1695 is resolved
-
-val jsonClient = HttpClient {
-    install(JsonFeature) { serializer = KotlinxSerializer() }
+var cartItems: List<CartItem> by Delegates.observable(emptyList()) { _, _, new ->
+    list.renderCart(new)
 }
 
-interface AppState : RState {
-    var cartItems: List<CartItem>
+val list: HTMLUListElement = document.create.ul {} as HTMLUListElement
+
+fun main() {
+
+    document.body?.appendChild(list)
+    document.body?.addForm()
+    GlobalScope.launch {
+        cartItems = obtainCart()
+    }
 }
 
-class App : RComponent<RProps, AppState>() {
-    override fun AppState.init() {
-        cartItems = listOf()
-        GlobalScope.launch { obtainCart() }
-    }
-
-    suspend fun obtainCart() {
-        val result = jsonClient.get<List<CartItem>>(endpoint + CartItem.path)
-        setState { cartItems = result }
-    }
-
-    suspend fun sendCartItem(cartItem: CartItem) {
-        jsonClient.post<Unit>(endpoint + CartItem.path) {
-            contentType(ContentType.Application.Json)
-            body = cartItem
-        }
-    }
-
-    suspend fun deleteCartItem(cartItem: CartItem) {
-        jsonClient.delete<Unit>(endpoint + CartItem.path + "/${cartItem.id}")
-    }
-
-    val addCartItem: (String) -> Unit = { input ->
+fun HTMLElement.addForm() {
+    fun handleSubmit(e: Event) {
+        e.preventDefault()
+        val element = document.getElementById("listInput") as HTMLInputElement
+        val input = element.value
+        element.value = ""
         val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
-        //setState { cartItems += cartItem }
         GlobalScope.launch {
             sendCartItem(cartItem)
-            obtainCart()
+            cartItems = obtainCart()
         }
     }
 
-    override fun RBuilder.render() {
-        h1 {
-            +"Full-Stack Shopping List"
-        }
-        state.cartItems.sortedByDescending(CartItem::priority).forEach {
-            p {
-                key = it.toString()
-                +"[${it.priority}] ${it.desc} "
-                button {
-                    attrs.onClickFunction = { e ->
-                        GlobalScope.launch {
-                            deleteCartItem(it)
-                            obtainCart()
-                        }
-                    }
-                }
+    append {
+        form {
+            onSubmitFunction = ::handleSubmit
+            input {
+                id = "listInput"
             }
-        }
-        child(InputComponent::class) {
-            key = "inComponent"
-            attrs.onSubmit = addCartItem
         }
     }
 }
 
+
+fun HTMLUListElement.renderCart(cart: List<CartItem>) {
+    list.textContent = ""
+    cart.forEach { cartItem ->
+        append.li {
+            onClickFunction = {
+                GlobalScope.launch {
+                    deleteCartItem(cartItem)
+                    cartItems = obtainCart()
+                }
+            }
+            +cartItem.desc
+        }
+    }
+}
