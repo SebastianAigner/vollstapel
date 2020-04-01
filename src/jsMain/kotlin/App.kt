@@ -15,17 +15,6 @@ import react.dom.h1
 import react.dom.p
 import kotlin.browser.window
 
-val endpoint = with(window.location) {
-    listOf(
-        if (protocol.contains("s")) "https" else "http",
-        "://",
-        host
-    ).joinToString("")
-} // makeshift fix until https://github.com/ktorio/ktor/issues/1695 is resolved
-
-val jsonClient = HttpClient {
-    install(JsonFeature) { serializer = KotlinxSerializer() }
-}
 
 interface AppState : RState {
     var cartItems: List<CartItem>
@@ -34,31 +23,15 @@ interface AppState : RState {
 class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
         cartItems = listOf()
-        GlobalScope.launch { obtainCart() }
-    }
-
-    suspend fun obtainCart() {
-        val result = jsonClient.get<List<CartItem>>(endpoint + CartItem.path)
-        setState { cartItems = result }
-    }
-
-    suspend fun sendCartItem(cartItem: CartItem) {
-        jsonClient.post<Unit>(endpoint + CartItem.path) {
-            contentType(ContentType.Application.Json)
-            body = cartItem
+        GlobalScope.launch {
+            refreshCart()
         }
     }
 
-    suspend fun deleteCartItem(cartItem: CartItem) {
-        jsonClient.delete<Unit>(endpoint + CartItem.path + "/${cartItem.id}")
-    }
-
-    val addCartItem: (String) -> Unit = { input ->
-        val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
-        //setState { cartItems += cartItem }
-        GlobalScope.launch {
-            sendCartItem(cartItem)
-            obtainCart()
+    suspend fun refreshCart() {
+        val newItems = obtainCart()
+        setState {
+            cartItems = newItems
         }
     }
 
@@ -74,7 +47,7 @@ class App : RComponent<RProps, AppState>() {
                     attrs.onClickFunction = { e ->
                         GlobalScope.launch {
                             deleteCartItem(it)
-                            obtainCart()
+                            refreshCart()
                         }
                     }
                 }
@@ -82,7 +55,13 @@ class App : RComponent<RProps, AppState>() {
         }
         child(InputComponent::class) {
             key = "inComponent"
-            attrs.onSubmit = addCartItem
+            attrs.onSubmit = { input ->
+                val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
+                GlobalScope.launch {
+                    sendCartItem(cartItem)
+                    refreshCart()
+                }
+            }
         }
     }
 }
