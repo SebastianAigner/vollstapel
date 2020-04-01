@@ -97,14 +97,13 @@ application {
 
 // include JS artifacts in any JAR we generate
 tasks.getByName<Jar>("jvmJar") {
-    val taskName = "jsBrowserDevelopmentWebpack"
-    dependsOn(tasks.getByName(taskName)) // make sure JS gets compiled first
-    val webpackTask = tasks.getByName<KotlinWebpack>(taskName)
+    val webpackTask = tasks.getByName<KotlinWebpack>("jsBrowserDevelopmentWebpack")
+    dependsOn(webpackTask) // make sure JS gets compiled first
     from(File(webpackTask.destinationDirectory, webpackTask.outputFileName)) // bring output file along into the JAR
 }
 
 tasks.getByName<Sync>("installDist") {
-    from("build/libs") {
+    from("$buildDir/libs") {
         rename("${rootProject.name}-jvm", rootProject.name)
         into("lib")
     }
