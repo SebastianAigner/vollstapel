@@ -102,13 +102,18 @@ tasks.getByName<Jar>("jvmJar") {
     from(File(webpackTask.destinationDirectory, webpackTask.outputFileName)) // bring output file along into the JAR
 }
 
-tasks.getByName<Sync>("installDist") {
-    from("$buildDir/libs") {
-        rename("${rootProject.name}-jvm", rootProject.name)
-        into("lib")
+distributions {
+    main {
+        contents {
+            from("$buildDir/libs") {
+                rename("${rootProject.name}-jvm", rootProject.name)
+                into("lib")
+            }
+        }
     }
 }
 
+// Alias "installDist" as "stage" for Heroku
 tasks.create("stage") {
     dependsOn(tasks.getByName("installDist"))
 }
