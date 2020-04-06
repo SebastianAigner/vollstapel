@@ -5,12 +5,14 @@ import io.ktor.features.CORS
 import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.gzip
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receive
 import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.delete
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -36,7 +38,7 @@ val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
     ConnectionString("$it?retryWrites=false")
 }
 
-val client =  if(connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
+val client = if (connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
 val database = client.getDatabase(connectionString?.database ?: "test")
 val collection = database.getCollection<CartItem>()
 
@@ -57,7 +59,13 @@ fun main() {
         }
 
         routing {
-            static("/static") {
+            get("/") {
+                call.respondText(
+                    this::class.java.classLoader.getResource("index.html")!!.readText(),
+                    ContentType.Text.Html
+                )
+            }
+            static("/") {
                 resources("")
             }
             get(CartItem.path) {
@@ -67,7 +75,7 @@ fun main() {
                 collection.insertOne(call.receive<CartItem>())
                 call.respond(HttpStatusCode.OK)
             }
-            delete(CartItem.path +"/{id}") {
+            delete(CartItem.path + "/{id}") {
                 val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
                 collection.deleteOne(CartItem::id eq id)
                 call.respond(HttpStatusCode.OK)

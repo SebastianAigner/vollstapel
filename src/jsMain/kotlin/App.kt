@@ -1,3 +1,4 @@
+import kotlinext.js.jsObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.js.onClickFunction
@@ -6,54 +7,45 @@ import react.dom.h1
 import react.dom.li
 import react.dom.ul
 
+val App = functionalComponent<RProps> { _ ->
+    val (cart, setCart) = useState(emptyList<CartItem>())
 
-interface AppState : RState {
-    var cartItems: List<CartItem>
-}
-
-class App : RComponent<RProps, AppState>() {
-    override fun AppState.init() {
-        cartItems = listOf()
+    useEffect(dependencies = listOf()) {
         GlobalScope.launch {
-            refreshCart()
+            val newValue = obtainCart()
+            setCart(newValue)
         }
     }
 
-    suspend fun refreshCart() {
-        val newItems = obtainCart()
-        setState {
-            cartItems = newItems
-        }
+    h1 {
+        +"Full-Stack Shopping List"
     }
-
-    override fun RBuilder.render() {
-        h1 {
-            +"Full-Stack Shopping List"
-        }
-        ul {
-            state.cartItems.sortedByDescending(CartItem::priority).forEach { item ->
-                li {
-                    key = item.toString()
-                    +"[${item.priority}] ${item.desc} "
-                    attrs.onClickFunction = {
-                        GlobalScope.launch {
-                            deleteCartItem(item)
-                            refreshCart()
-                        }
+    ul {
+        cart.sortedByDescending(CartItem::priority).forEach { item ->
+            li {
+                key = item.toString()
+                +"[${item.priority}] ${item.desc} "
+                attrs.onClickFunction = {
+                    GlobalScope.launch {
+                        deleteCartItem(item)
+                        setCart(obtainCart())
                     }
                 }
             }
         }
-        child(InputComponent::class) {
-            key = "inComponent"
-            attrs.onSubmit = { input ->
+    }
+
+    child(
+        functionalComponent = InputComponent,
+        props = jsObject {
+            onSubmit = { input ->
                 val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
                 GlobalScope.launch {
                     sendCartItem(cartItem)
-                    refreshCart()
+                    setCart(obtainCart())
                 }
             }
         }
-    }
+    )
 }
 

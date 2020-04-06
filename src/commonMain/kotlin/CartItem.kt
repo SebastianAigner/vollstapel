@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 data class CartItem(val desc: String, val priority: Int) {
     val id: Int = desc.hashCode()
     companion object {
-        val path = "/cart"
+        const val path = "/cart"
     }
 }
