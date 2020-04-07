@@ -40,7 +40,7 @@ val connectionString: ConnectionString? = System.getenv("MONGODB_URI")?.let {
 
 val client = if (connectionString != null) KMongo.createClient(connectionString) else KMongo.createClient()
 val database = client.getDatabase(connectionString?.database ?: "test")
-val collection = database.getCollection<CartItem>()
+val collection = database.getCollection<ShoppingListItem>()
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 9090
@@ -68,16 +68,16 @@ fun main() {
             static("/") {
                 resources("")
             }
-            get(CartItem.path) {
+            get(ShoppingListItem.path) {
                 call.respond(collection.find().toList())
             }
-            post(CartItem.path) {
-                collection.insertOne(call.receive<CartItem>())
+            post(ShoppingListItem.path) {
+                collection.insertOne(call.receive<ShoppingListItem>())
                 call.respond(HttpStatusCode.OK)
             }
-            delete(CartItem.path + "/{id}") {
+            delete(ShoppingListItem.path + "/{id}") {
                 val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
-                collection.deleteOne(CartItem::id eq id)
+                collection.deleteOne(ShoppingListItem::id eq id)
                 call.respond(HttpStatusCode.OK)
             }
         }

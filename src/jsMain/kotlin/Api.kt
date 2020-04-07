@@ -14,17 +14,17 @@ val jsonClient = HttpClient {
     install(JsonFeature) { serializer = KotlinxSerializer() }
 }
 
-suspend fun obtainCart(): List<CartItem> {
-    return jsonClient.get(endpoint + CartItem.path)
+suspend fun getShoppingList(): List<ShoppingListItem> {
+    return jsonClient.get(endpoint + ShoppingListItem.path)
 }
 
-suspend fun sendCartItem(cartItem: CartItem) {
-    jsonClient.post<Unit>(endpoint + CartItem.path) {
+suspend fun addShoppingListItem(shoppingListItem: ShoppingListItem) {
+    jsonClient.post<Unit>(endpoint + ShoppingListItem.path) {
         contentType(ContentType.Application.Json)
-        body = cartItem
+        body = shoppingListItem
     }
 }
 
-suspend fun deleteCartItem(cartItem: CartItem) {
-    jsonClient.delete<Unit>(endpoint + CartItem.path + "/${cartItem.id}")
+suspend fun deleteShoppingListItem(shoppingListItem: ShoppingListItem) {
+    jsonClient.delete<Unit>(endpoint + ShoppingListItem.path + "/${shoppingListItem.id}")
 }
