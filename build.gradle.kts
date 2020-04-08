@@ -35,62 +35,62 @@ kotlin {
             }
         }
     }
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib-common"))
-                implementation("io.ktor:ktor-serialization:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion")
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
-        }
-
-        val jvmMain by getting {
-            dependencies {
-                implementation("io.ktor:ktor-server-core:$ktorVersion")
-                implementation("io.ktor:ktor-server-netty:$ktorVersion")
-                implementation("ch.qos.logback:logback-classic:1.2.3")
-                implementation(kotlin("stdlib", kotlinVersion)) // or "stdlib-jdk8"
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion") // JVM dependency
-                implementation("io.ktor:ktor-websockets:$ktorVersion")
-
-                implementation("org.litote.kmongo:kmongo-coroutine-serialization:3.12.2")
-            }
-        }
-
-        val jsMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib-js"))
-
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion")
-                //todo: bugfix in kx.serialization?
-                implementation(npm("text-encoding"))
-                implementation(npm("abort-controller"))
-
-                implementation("io.ktor:ktor-client-js:$ktorVersion") //include http&websockets
-                //todo: bugfix in ktor-client?
-                implementation(npm("bufferutil")) //TODO: Uncomment this and stuff breaks. WHY?
-                implementation(npm("utf-8-validate"))
-
-                //ktor client js json
-                implementation("io.ktor:ktor-client-json-js:$ktorVersion")
-                implementation("io.ktor:ktor-client-serialization-js:$ktorVersion")
-                implementation(npm("fs"))
-
-                //React, React DOM + Wrappers (chapter 3)
-                implementation("org.jetbrains:kotlin-react:16.13.0-pre.93-kotlin-1.3.70")
-                implementation("org.jetbrains:kotlin-react-dom:16.13.0-pre.93-kotlin-1.3.70")
-                implementation(npm("react", "16.13.0"))
-                implementation(npm("react-dom", "16.13.0"))
-            }
+sourceSets {
+val commonMain by getting {
+    dependencies {
+        implementation(kotlin("stdlib-common"))
+        implementation("io.ktor:ktor-serialization:$ktorVersion")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion")
+        implementation("io.ktor:ktor-client-core:$ktorVersion")
+    }
+}
+    val commonTest by getting {
+        dependencies {
+            implementation(kotlin("test-common"))
+            implementation(kotlin("test-annotations-common"))
         }
     }
+
+val jvmMain by getting {
+    dependencies {
+        implementation("io.ktor:ktor-server-core:$ktorVersion")
+        implementation("io.ktor:ktor-server-netty:$ktorVersion")
+        implementation("ch.qos.logback:logback-classic:1.2.3")
+        implementation(kotlin("stdlib", kotlinVersion)) // or "stdlib-jdk8"
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion") // JVM dependency
+        implementation("io.ktor:ktor-websockets:$ktorVersion")
+
+        implementation("org.litote.kmongo:kmongo-coroutine-serialization:3.12.2")
+    }
+}
+
+    val jsMain by getting {
+        dependencies {
+            implementation(kotlin("stdlib-js"))
+
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion")
+            //todo: bugfix in kx.serialization?
+            implementation(npm("text-encoding"))
+            implementation(npm("abort-controller"))
+
+            implementation("io.ktor:ktor-client-js:$ktorVersion")
+            //todo: bugfix in ktor-client?
+            implementation(npm("bufferutil")) //TODO: Uncomment this and stuff breaks. WHY?
+            implementation(npm("utf-8-validate"))
+
+            //ktor client js json
+            implementation("io.ktor:ktor-client-json-js:$ktorVersion")
+            implementation("io.ktor:ktor-client-serialization-js:$ktorVersion")
+            implementation(npm("fs"))
+
+            //React, React DOM + Wrappers (chapter 3)
+            implementation("org.jetbrains:kotlin-react:16.13.0-pre.93-kotlin-1.3.70")
+            implementation("org.jetbrains:kotlin-react-dom:16.13.0-pre.93-kotlin-1.3.70")
+            implementation(npm("react", "16.13.0"))
+            implementation(npm("react-dom", "16.13.0"))
+        }
+    }
+}
 }
 
 application {
@@ -109,6 +109,14 @@ tasks.getByName<Jar>("jvmJar") {
     from(File(webpackTask.destinationDirectory, webpackTask.outputFileName)) // bring output file along into the JAR
 }
 
+
+
+// Alias "installDist" as "stage" for Heroku
+tasks.create("stage") {
+    dependsOn(tasks.getByName("installDist"))
+}
+
+// only necessary until https://youtrack.jetbrains.com/issue/KT-37964 is resolved
 distributions {
     main {
         contents {
@@ -118,11 +126,6 @@ distributions {
             }
         }
     }
-}
-
-// Alias "installDist" as "stage" for Heroku
-tasks.create("stage") {
-    dependsOn(tasks.getByName("installDist"))
 }
 
 tasks.getByName<JavaExec>("run") {

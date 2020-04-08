@@ -1,13 +1,9 @@
+import react.*
+import react.dom.*
+import kotlinx.html.js.*
 import kotlinx.html.InputType
-import kotlinx.html.js.onChangeFunction
-import kotlinx.html.js.onSubmitFunction
-import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.Event
-import react.RProps
-import react.dom.form
-import react.dom.input
-import react.functionalComponent
-import react.useState
+import org.w3c.dom.HTMLInputElement
 
 external interface InputProps : RProps {
     var onSubmit: (String) -> Unit

@@ -1,19 +1,17 @@
 import kotlinext.js.jsObject
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.html.js.onClickFunction
 import react.*
-import react.dom.h1
-import react.dom.li
-import react.dom.ul
+import react.dom.*
+import kotlinx.html.js.*
+import kotlinx.coroutines.*
+
+val scope = MainScope()
 
 val App = functionalComponent<RProps> { _ ->
-    val (cart, setCart) = useState(emptyList<CartItem>())
+    val (shoppingList, setShoppingList) = useState(emptyList<ShoppingListItem>())
 
     useEffect(dependencies = listOf()) {
-        GlobalScope.launch {
-            val newValue = obtainCart()
-            setCart(newValue)
+        scope.launch {
+            setShoppingList(getShoppingList())
         }
     }
 
@@ -21,14 +19,14 @@ val App = functionalComponent<RProps> { _ ->
         +"Full-Stack Shopping List"
     }
     ul {
-        cart.sortedByDescending(CartItem::priority).forEach { item ->
+        shoppingList.sortedByDescending(ShoppingListItem::priority).forEach { item ->
             li {
                 key = item.toString()
                 +"[${item.priority}] ${item.desc} "
                 attrs.onClickFunction = {
-                    GlobalScope.launch {
-                        deleteCartItem(item)
-                        setCart(obtainCart())
+                    scope.launch {
+                        deleteShoppingListItem(item)
+                        setShoppingList(getShoppingList())
                     }
                 }
             }
@@ -39,13 +37,12 @@ val App = functionalComponent<RProps> { _ ->
         functionalComponent = InputComponent,
         props = jsObject {
             onSubmit = { input ->
-                val cartItem = CartItem(input.replace("!", ""), input.count { it == '!' })
-                GlobalScope.launch {
-                    sendCartItem(cartItem)
-                    setCart(obtainCart())
+                val cartItem = ShoppingListItem(input.replace("!", ""), input.count { it == '!' })
+                scope.launch {
+                    addShoppingListItem(cartItem)
+                    setShoppingList(getShoppingList())
                 }
             }
         }
     )
 }
-
